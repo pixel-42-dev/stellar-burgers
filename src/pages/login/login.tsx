@@ -2,13 +2,19 @@ import { FC, SyntheticEvent, useState } from 'react';
 import { LoginUI } from '@ui-pages';
 import { useDispatch, useSelector } from '../../services/store';
 import { getError, login } from '../../services/slices/userSlice';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 export const Login: FC = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const localStorageEmail = localStorage.getItem('email') ?? '';
   const [email, setEmail] = useState(localStorageEmail);
   const [password, setPassword] = useState('');
   const error = useSelector(getError);
+
+  const from = (location.state as { from?: Location })?.from?.pathname || '/';
 
   const handleSubmit = (e: SyntheticEvent) => {
     e.preventDefault();
@@ -18,7 +24,11 @@ export const Login: FC = () => {
         email: email,
         password: password
       })
-    );
+    ).then((res: any) => {
+      if (res.meta.requestStatus === 'fulfilled') {
+        navigate(from, { replace: true });
+      }
+    });
   };
 
   return (
